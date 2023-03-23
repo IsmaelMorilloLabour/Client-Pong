@@ -1,4 +1,3 @@
-import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -21,10 +20,6 @@ class Pelota {
         this.velocityX = 5;
         this.velocityY = 5;
         this.shape = new Circle(radius, color);
-    }
-
-    public void addToCanvas(Canvas canvas) {
-        // TODO Auto-generated method stub
     }
 
     public void setPosition(double positionX, double positionY) {

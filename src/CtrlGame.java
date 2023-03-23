@@ -9,9 +9,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 
 public class CtrlGame implements Initializable {
-    
-    public static double width;
-    public static double height;
 
     @FXML
     private AnchorPane anchor;
@@ -43,8 +40,8 @@ public class CtrlGame implements Initializable {
 
     public void updateCanvasSize () {
 
-        width = UtilsViews.parentContainer.getWidth();
-        height = UtilsViews.parentContainer.getHeight();
+        final double width = UtilsViews.parentContainer.getWidth();
+        final double height = UtilsViews.parentContainer.getHeight();
 
         // Set Canvas size
         canvas.setWidth(width);

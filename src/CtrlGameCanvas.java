@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+
+import org.json.JSONObject;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,15 +16,23 @@ public class CtrlGameCanvas {
     private GraphicsContext gc;
     private AnimationTimer animationTimer;
 
-    private double borderSize = 5;
+    private double borderSize = 2.5;
 
     private String gameStatus = "playing";
 
     private int playerPoints = 0;
-    private int player2Points = 0;
+    private double playerX = 10;
+    private double playerY = 10;
+    
+    private int enemyPoints = 0;
+    private double enemyX = 10;
+    private double enemyY = 10;
 
-    private double playerX = Double.POSITIVE_INFINITY;
-    private double playerY = Double.POSITIVE_INFINITY;
+    int actualWidthPlayer = 0;
+    int actualHeightPlayer = 0;
+    int actualWidthEnemy = 0;
+    int actualHeightEnemy = 0;
+    
 
     private final double playerWidth = 200;
     private final double playerHalf = playerWidth / 2;
@@ -28,26 +40,27 @@ public class CtrlGameCanvas {
     private double playerSpeed = 250;
     private final double playerSpeedIncrement = 15;
     public String playerDirection = "none";
-
+    
     private double ballX = Double.POSITIVE_INFINITY;
     private double ballY = Double.POSITIVE_INFINITY;
-
     private final double ballSize = 15;
     private final double ballHalf = ballSize / 2;
     private double ballSpeed = 200;
     private final double ballSpeedIncrement = 25;
-    private String ballDirection = "upRight";
+    private String ballDirection = "upLeft";
 
     // Iniciar el context i bucle de dibuix
     public void start (Canvas canvas) {
-        Pelota pelota = new Pelota(ballX, ballY, ballSpeed, Color.BLACK);
+
         cnv = canvas;
 
         // Define drawing context
         gc = canvas.getGraphicsContext2D();
 
         // Set initial positions
-        pelota.setPosition(cnv.getWidth() / 2, cnv.getHeight() / 2);
+        ballX = cnv.getWidth() / 2;
+        ballY = cnv.getHeight() / 2;
+        playerX = cnv.getWidth() / 2;
 
         // Init drawing bucle
         animationTimer = new UtilsFps(this::run, this::draw);
@@ -55,8 +68,32 @@ public class CtrlGameCanvas {
     }
 
     // Aturar el bucle de dibuix
-    public void stop () {
+    public void stop() {
         animationTimer.stop();
+    }
+    
+    private void sendMessage() {
+        JSONObject obj = new JSONObject("{}");
+        obj.put("type", "broadcast");
+        obj.put("actualWidthEnemy", actualWidthEnemy);
+        obj.put("actualHeightEnemy", actualHeightEnemy);
+        obj.put("actualWidthPlayer", actualWidthPlayer);
+        obj.put("actualHeightPlayer", actualHeightPlayer);
+
+        Main.socketClient.safeSend(obj.toString());
+        System.out.println("Send WebSocket: " + obj.toString());
+    }
+
+    public void receiveMessage(JSONObject messageObj) {
+        System.out.println("Receive WebSocket: " + messageObj.toString());
+        String type = messageObj.getString("type");
+
+
+        if (type.equals("broadcast")) {
+
+            // TODO 
+
+        }
     }
 
     // Animar
@@ -69,25 +106,25 @@ public class CtrlGameCanvas {
 
         // Move player
         switch (playerDirection) {
-            case "right":
-                playerX = playerX + playerSpeed / fps; 
+            case "up":
+                playerY = playerY + playerSpeed / fps; 
                 break;
-            case "left":
-                playerX = playerX - playerSpeed / fps;
+            case "down":
+                playerY = playerY - playerSpeed / fps;
                 break;
         }
 
         // Keep player in bounds
-        final double playerMinX = playerHalf;
-        final double playerMaxX = boardWidth - playerHalf;
+        final double playerMinY = playerHalf;
+        final double playerMaxY = boardWidth - playerHalf;
 
-        if (playerX < playerMinX) {
+        if (playerY < playerMinY) {
 
-            playerX = playerMinX;
+            playerY = playerMinY;
 
-        } else if (playerX > playerMaxX) {
+        } else if (playerY > playerMaxY) {
 
-            playerX = playerMaxX;
+            playerY = playerMaxY;
         }
 
         // Move ball
@@ -119,39 +156,17 @@ public class CtrlGameCanvas {
         final double[] intersectionLeft = findIntersection(lineBall, lineBoardLeft);
 
         final double boardMaxX = boardWidth - borderSize;
+        final double boardMaxY = boardHeight;
         final double[][] lineBoardRight = { {boardMaxX, 0}, {boardMaxX, boardHeight} };
         final double[] intersectionRight = findIntersection(lineBall, lineBoardRight);
 
         final double[][] lineBoardTop = { {0, borderSize}, {boardWidth, borderSize} };
         final double[] intersectionTop = findIntersection(lineBall, lineBoardTop);
 
-        if (intersectionLeft != null) {
-            switch (ballDirection) {
-                case "upLeft": 
-                    ballDirection = "upRight";
-                    break;
-                case "downLeft": 
-                    ballDirection = "downRight";
-                    break;
-            }
-            ballX = intersectionLeft[0] + 1;
-            ballY = intersectionLeft[1];
+        final double[][] lineBoardBottom = { { 0, boardMaxY - 50}, { boardHeight, borderSize } };
+        final double[] intersectionBottom = findIntersection(lineBall, lineBoardBottom);
 
-        } else if (intersectionRight != null) {
-
-            switch (ballDirection) {
-                case "upRight": 
-                    ballDirection = "upLeft";
-                    break;
-                case "downRight": 
-                    ballDirection = "downLeft";
-                    break;
-            }
-            ballX = intersectionRight[0] - 1;
-            ballY = intersectionRight[1];
-
-        } else if (intersectionTop != null) {
-
+        if (intersectionTop != null) {
             switch (ballDirection) {
                 case "upRight": 
                     ballDirection = "downRight"; 
@@ -163,9 +178,31 @@ public class CtrlGameCanvas {
             ballX = intersectionTop[0];
             ballY = intersectionTop[1] + 1;
 
+        } else if (intersectionBottom != null) {
+
+            switch (ballDirection) {
+                case "downRight":
+                    ballDirection = "upLeft";
+                    break;
+                case "downLeft":
+                    ballDirection = "upRight";
+                    break;
+            }
+
+            ballX = intersectionBottom[0];
+            ballY = intersectionBottom[1] - 1;
+
         } else {
-            if (ballNextY > boardHeight) {
-                gameStatus = "gameOver";
+            if (ballNextX < 0) {
+                playerPoints += 1;
+                ballX = boardWidth / 2;
+                ballY = boardHeight / 2;
+                
+            } else if(ballNextX > boardWidth){
+                enemyPoints += 1;
+                ballX = boardWidth / 2;
+                ballY = boardHeight / 2;
+                
             } else {
                 ballX = ballNextX;
                 ballY = ballNextY;
@@ -204,16 +241,14 @@ public class CtrlGameCanvas {
         gc.clearRect(0, 0, cnv.getWidth(), cnv.getHeight());
 
         // Draw board
-        gc.setStroke(Color.GRAY);
+        gc.setStroke(Color.BLACK);
         gc.setLineWidth(borderSize);
         gc.strokeRect(0, 0, borderSize, cnv.getHeight());
         gc.strokeRect(0, 0, cnv.getWidth(), borderSize);
         gc.strokeRect(cnv.getWidth() - borderSize, 0, borderSize, cnv.getHeight());
 
-        // Draw player
-        gc.setStroke(Color.GREEN);
-        gc.setLineWidth(playerHeight);
-        gc.strokeRect(playerX - playerHalf, playerY, playerWidth, playerHeight);
+        drawPlayer(150, 200, Color.GREEN);
+        drawPlayer(cnv.getWidth() + 50, 200, Color.PURPLE);
 
         // Draw ball
         gc.setFill(Color.BLACK);
@@ -222,11 +257,13 @@ public class CtrlGameCanvas {
         // Draw text with points
         gc.setFill(Color.BLACK);
         gc.setFont(new Font("Arial", 20));
-        String pointsText = "Points: " + playerPoints;
-        drawText(gc, pointsText, cnv.getWidth() - 20, 20, "right");
+        String pointsPlayer = "Points: " + playerPoints;
+        String pointsEnemy = "Points: " + enemyPoints;
+        drawText(gc, pointsPlayer, cnv.getWidth() - 20, 20, "right");
+        drawText(gc, pointsEnemy, 20, 20, "left");
 
         // Draw game over text
-        if (gameStatus.equals("gameOver")) {
+        if (playerPoints >= 5 || enemyPoints >= 5) {
             final double boardCenterX = cnv.getWidth() / 2;
             final double boardCenterY = cnv.getHeight() / 2;
 
@@ -236,6 +273,7 @@ public class CtrlGameCanvas {
             gc.setFont(new Font("Arial", 20));
             drawText(gc, "You are a loser!", boardCenterX, boardCenterY + 20, "center");
         }
+
     }
 
     public static void drawText(GraphicsContext gc, String text, double x, double y, String alignment) {
@@ -261,19 +299,19 @@ public class CtrlGameCanvas {
 
     public static double[] findIntersection(double[][] lineA, double[][] lineB) {
         double[] result = new double[2];
-    
+
         final double aX0 = lineA[0][0];
         final double aY0 = lineA[0][1];
         final double aX1 = lineA[1][0];
         final double aY1 = lineA[1][1];
-    
+
         final double bX0 = lineB[0][0];
         final double bY0 = lineB[0][1];
         final double bX1 = lineB[1][0];
         final double bY1 = lineB[1][1];
-    
+
         double x, y;
-    
+
         if (aX1 == aX0) { // lineA is vertical
             if (bX1 == bX0) { // lineB is vertical too
                 return null;
@@ -290,29 +328,29 @@ public class CtrlGameCanvas {
         } else {
             final double aM = (aY1 - aY0) / (aX1 - aX0);
             final double aB = aY0 - aM * aX0;
-    
+
             final double bM = (bY1 - bY0) / (bX1 - bX0);
             final double bB = bY0 - bM * bX0;
 
             final double tolerance = 1e-5;
-            if (Math.abs(aM - bM) < tolerance) { 
+            if (Math.abs(aM - bM) < tolerance) {
                 return null;
             }
-    
+
             x = (bB - aB) / (aM - bM);
             y = aM * x + aB;
         }
-    
+
         // Check if the intersection point is within the bounding boxes of both line segments
         final double boundingBoxTolerance = 1e-5;
         final boolean withinA = x >= Math.min(aX0, aX1) - boundingBoxTolerance &&
-                                x <= Math.max(aX0, aX1) + boundingBoxTolerance &&
-                                y >= Math.min(aY0, aY1) - boundingBoxTolerance &&
-                                y <= Math.max(aY0, aY1) + boundingBoxTolerance;
+                x <= Math.max(aX0, aX1) + boundingBoxTolerance &&
+                y >= Math.min(aY0, aY1) - boundingBoxTolerance &&
+                y <= Math.max(aY0, aY1) + boundingBoxTolerance;
         final boolean withinB = x >= Math.min(bX0, bX1) - boundingBoxTolerance &&
-                                x <= Math.max(bX0, bX1) + boundingBoxTolerance &&
-                                y >= Math.min(bY0, bY1) - boundingBoxTolerance &&
-                                y <= Math.max(bY0, bY1) + boundingBoxTolerance;
+                x <= Math.max(bX0, bX1) + boundingBoxTolerance &&
+                y >= Math.min(bY0, bY1) - boundingBoxTolerance &&
+                y <= Math.max(bY0, bY1) + boundingBoxTolerance;
 
         if (withinA && withinB) {
             result[0] = x;
@@ -320,7 +358,13 @@ public class CtrlGameCanvas {
         } else {
             return null;
         }
-    
+
         return result;
+    }
+    
+    public void drawPlayer(double x, int y, Color color) {
+        gc.setStroke(color);
+        gc.setLineWidth(playerHeight);
+        gc.strokeRect(x - playerHalf, y, 5, 200);
     }
 }

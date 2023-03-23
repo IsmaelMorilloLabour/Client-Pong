@@ -10,10 +10,14 @@ import javafx.stage.WindowEvent;
 
 public class Main extends Application {
     
-    public static int port = 3000;
-    public static String protocol = "http";
-    public static String host = "localhost";
     public static String protocolWS = "ws";
+    public static String host = "localhost";
+    public static int port = 3000;
+    /*
+        public static String protocolWS = "wss";
+        public static String host = "serverpong-production.up.railway.app";
+        public static int port = 443;
+    */
 
     public static UtilsWS socketClient;
     private CtrlGame ctrlGame;
@@ -29,16 +33,15 @@ public class Main extends Application {
         final int windowHeight = 600;
 
         UtilsViews.parentContainer.setStyle("-fx-font: 14 arial;");
-        UtilsViews.addView(getClass(), "ViewLogin", "./assets/viewLogin.fxml");
+        // UtilsViews.addView(getClass(), "ViewLogin", "./assets/viewLogin.fxml");
         UtilsViews.addView(getClass(), "ViewGame", "./assets/viewGame.fxml");
-        
         ctrlGame = (CtrlGame) UtilsViews.getController("ViewGame");
         
         Scene scene = new Scene(UtilsViews.parentContainer);
         scene.addEventFilter(KeyEvent.ANY, keyEvent -> { ctrlGame.keyEvent(keyEvent); });
         
         stage.setScene(scene);
-        stage.onCloseRequestProperty(); // Call close method when closing window
+        stage.onCloseRequestProperty();
         stage.setTitle("M9 Pong");
         stage.setMinWidth(windowWidth);
         stage.setMinHeight(windowHeight);
@@ -54,12 +57,11 @@ public class Main extends Application {
         // Iniciar WebSockets
         socketClient = UtilsWS.getSharedInstance(protocolWS + "://" + host + ":" + port);
         socketClient.onMessage((response) -> {
-
             // JavaFX necessita que els canvis es facin des de el thread principal
             Platform.runLater(() -> {
-                // Fer aquí els canvis a la interficie
                 JSONObject msgObj = new JSONObject(response);
-                
+                CtrlGameCanvas ctrl = (CtrlGameCanvas) UtilsViews.getController("ViewGame");
+                ctrl.receiveMessage(msgObj);
             });
         });
     }

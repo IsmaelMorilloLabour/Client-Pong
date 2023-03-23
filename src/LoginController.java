@@ -17,4 +17,25 @@ public class LoginController implements Initializable{
     public void initialize(URL arg0, ResourceBundle arg1) {
 
     }
+
+    @FXML
+    public void connect() {
+        
+        if (servidor.getText().isBlank()) {
+            servidor.setText("ws://localhost:3000");
+            goToGame();
+        } else {
+            String[] server = servidor.getText().split(":");
+            
+            Main.protocolWS = server[0];
+            Main.host = server[1].replace("//","");
+            Main.port = Integer.parseInt(server[2]);
+            goToGame();
+        }
+    }
+
+    @FXML
+    private void goToGame() {
+        UtilsViews.setViewAnimating("ViewGame");
+    }
 }

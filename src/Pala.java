@@ -18,7 +18,7 @@ public class Pala {
         this.color = color;
         this.shape = new Rectangle(width, height, color);
     }
-    
+
     public void setPosition(double positionX, double positionY) {
         this.positionX = positionX;
         this.positionY = positionY;
@@ -46,10 +46,13 @@ public class Pala {
     }
 
     public void moveDown(double speed) {
-        if (positionY <= CtrlGame.height - height - speed) {
-            positionY += speed;
-            shape.setY(positionY);
-        }
+        /**
+         * 
+         if (positionY <= CtrlGame.height - height - speed) {
+             positionY += speed;
+             shape.setY(positionY);
+            }
+            */
     }
 
 }

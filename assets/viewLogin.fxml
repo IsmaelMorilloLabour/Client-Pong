@@ -24,6 +24,6 @@
             <TextField fx:id="servidor" prefHeight="25.0" prefWidth="245.0" promptText="Introduce una dirección" />
          </children>
       </VBox>
-      <Button fx:id="jugar" layoutX="261.0" layoutY="292.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="78.0" text="Jugar" />
+      <Button fx:id="jugar" layoutX="261.0" layoutY="292.0" mnemonicParsing="false" onAction="#connect" prefHeight="37.0" prefWidth="78.0" text="Jugar" />
    </children>
 </AnchorPane>
