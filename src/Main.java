@@ -33,10 +33,11 @@ public class Main extends Application {
         final int windowHeight = 600;
 
         UtilsViews.parentContainer.setStyle("-fx-font: 14 arial;");
-        // UtilsViews.addView(getClass(), "ViewLogin", "./assets/viewLogin.fxml");
+        UtilsViews.addView(getClass(), "ViewLogin", "./assets/viewLogin.fxml");
         UtilsViews.addView(getClass(), "ViewGame", "./assets/viewGame.fxml");
         ctrlGame = (CtrlGame) UtilsViews.getController("ViewGame");
-        
+        System.out.println(ctrlGame);
+
         Scene scene = new Scene(UtilsViews.parentContainer);
         scene.addEventFilter(KeyEvent.ANY, keyEvent -> { ctrlGame.keyEvent(keyEvent); });
         
@@ -59,11 +60,8 @@ public class Main extends Application {
         socketClient.onMessage((response) -> {
             // JavaFX necessita que els canvis es facin des de el thread principal
             Platform.runLater(() -> {
-                /* 
-                 JSONObject msgObj = new JSONObject(response);
-                 CtrlGameCanvas ctrl = (CtrlGameCanvas) UtilsViews.getController("ViewGame");
-                 ctrl.receiveMessage(msgObj);
-                 */
+                JSONObject msgObj = new JSONObject(response);
+                CtrlGame.ctrlCanvas.receiveMessage(msgObj);
             });
         });
     }

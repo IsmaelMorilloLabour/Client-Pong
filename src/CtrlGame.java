@@ -16,7 +16,7 @@ public class CtrlGame implements Initializable {
     @FXML
     private Canvas canvas;
 
-    private static CtrlGameCanvas ctrlCanvas = new CtrlGameCanvas();
+    public static CtrlGameCanvas ctrlCanvas = new CtrlGameCanvas();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

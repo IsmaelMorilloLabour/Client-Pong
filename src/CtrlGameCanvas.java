@@ -26,10 +26,10 @@ public class CtrlGameCanvas {
     private double enemyX = 0;
     private double enemyY = 200;
 
-    int actualWidthPlayer = 0;
-    int actualHeightPlayer = 0;
-    int actualWidthEnemy = 0;
-    int actualHeightEnemy = 0;
+    int actualXPlayer = 0;
+    int actualYPlayer = 0;
+    int actualXEnemy = 0;
+    int actualYEnemy = 0;
     
     private final double playerWidth = 5;
     private double playerSpeed = 300;
@@ -73,10 +73,10 @@ public class CtrlGameCanvas {
     private void sendMessage() {
         JSONObject obj = new JSONObject("{}");
         obj.put("type", "broadcast");
-        obj.put("actualWidthEnemy", actualWidthEnemy);
-        obj.put("actualHeightEnemy", actualHeightEnemy);
-        obj.put("actualWidthPlayer", actualWidthPlayer);
-        obj.put("actualHeightPlayer", actualHeightPlayer);
+        obj.put("actualXEnemy", actualXEnemy);
+        obj.put("actualYEnemy", actualYEnemy);
+        obj.put("actualXPlayer", actualXPlayer);
+        obj.put("actualYPlayer", actualYPlayer);
 
         Main.socketClient.safeSend(obj.toString());
         System.out.println("Send WebSocket: " + obj.toString());
@@ -129,14 +129,15 @@ public class CtrlGameCanvas {
         final double enemyMinY = boardHeight - 600;
         final double enemyMaxY = boardHeight - 200;
 
-        if (playerY < playerMinY || enemyY < enemyMinY) {
-
+        if (playerY < playerMinY) {
             playerY = playerMinY;
-            enemyY = enemyMinY;
-
-        } else if (playerY > playerMaxY || enemyY > enemyMaxY) {
-
+        } else if (playerY > playerMaxY) {
             playerY = playerMaxY;
+        }
+        
+        if( enemyY < enemyMinY){
+            enemyY = enemyMinY;
+        } else if (enemyY > enemyMaxY) {
             enemyY = enemyMaxY;
         }
 
