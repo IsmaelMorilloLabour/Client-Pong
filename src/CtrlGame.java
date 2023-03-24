@@ -52,23 +52,40 @@ public class CtrlGame implements Initializable {
 
         // Quan apretem una tecla
         if (evt.getEventType() == KeyEvent.KEY_PRESSED) {
-            if (evt.getCode() == KeyCode.LEFT) {
-                ctrlCanvas.playerDirection = "left";
+            if (evt.getCode() == KeyCode.UP) {
+                ctrlCanvas.enemyDirection = "up";
             }
-            if (evt.getCode() == KeyCode.RIGHT) {
-                ctrlCanvas.playerDirection = "right";
+            if (evt.getCode() == KeyCode.DOWN) {
+                ctrlCanvas.enemyDirection = "down";
+            }
+            
+            if (evt.getCode() == KeyCode.W) {
+                ctrlCanvas.playerDirection = "up";
+            }
+            if (evt.getCode() == KeyCode.S) {
+                ctrlCanvas.playerDirection = "down";
             }
         }
 
         // Quan deixem anar la tecla
         if (evt.getEventType() == KeyEvent.KEY_RELEASED) {
-            if (evt.getCode() == KeyCode.LEFT) {
-                if (ctrlCanvas.playerDirection.equals("left")) {
+            if (evt.getCode() == KeyCode.UP) {
+                if (ctrlCanvas.enemyDirection.equals("up")) {
+                    ctrlCanvas.enemyDirection = "none";
+                }
+            }
+            if (evt.getCode() == KeyCode.DOWN) {
+                if (ctrlCanvas.enemyDirection.equals("down")) {
+                    ctrlCanvas.enemyDirection = "none";
+                }
+            }
+            if (evt.getCode() == KeyCode.W) {
+                if (ctrlCanvas.playerDirection.equals("up")) {
                     ctrlCanvas.playerDirection = "none";
                 }
             }
-            if (evt.getCode() == KeyCode.RIGHT) {
-                if (ctrlCanvas.playerDirection.equals("right")) {
+            if (evt.getCode() == KeyCode.S) {
+                if (ctrlCanvas.playerDirection.equals("down")) {
                     ctrlCanvas.playerDirection = "none";
                 }
             }

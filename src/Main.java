@@ -59,9 +59,11 @@ public class Main extends Application {
         socketClient.onMessage((response) -> {
             // JavaFX necessita que els canvis es facin des de el thread principal
             Platform.runLater(() -> {
-                JSONObject msgObj = new JSONObject(response);
-                CtrlGameCanvas ctrl = (CtrlGameCanvas) UtilsViews.getController("ViewGame");
-                ctrl.receiveMessage(msgObj);
+                /* 
+                 JSONObject msgObj = new JSONObject(response);
+                 CtrlGameCanvas ctrl = (CtrlGameCanvas) UtilsViews.getController("ViewGame");
+                 ctrl.receiveMessage(msgObj);
+                 */
             });
         });
     }
