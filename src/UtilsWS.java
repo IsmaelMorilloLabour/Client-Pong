@@ -61,7 +61,7 @@ public class UtilsWS extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        System.out.println("WS connectio error: " + ex.getMessage());
+        System.out.println("WS connection error: " + ex.getMessage());
         if (ex.getMessage().contains("Connection refused") || ex.getMessage().contains("Connection reset")) {
             reconnect();
         }

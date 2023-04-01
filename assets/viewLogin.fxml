@@ -9,14 +9,14 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
    <children>
-      <Label layoutX="257.0" layoutY="72.0" text="Inicio">
+      <Label fx:id="title" layoutX="257.0" layoutY="72.0" text="Inicio">
          <font>
             <Font name="System Bold" size="33.0" />
          </font>
       </Label>
       <VBox layoutX="178.0" layoutY="186.0">
          <children>
-            <Label text="Servidor:">
+            <Label fx:id="inputTitle" text="Servidor:">
                <font>
                   <Font name="System Bold" size="16.0" />
                </font>
@@ -25,5 +25,10 @@
          </children>
       </VBox>
       <Button fx:id="jugar" layoutX="261.0" layoutY="292.0" mnemonicParsing="false" onAction="#connect" prefHeight="37.0" prefWidth="78.0" text="Jugar" />
+      <Label fx:id="waiting" layoutX="93.0" layoutY="163.0" text="Waiting for second player..." visible="false">
+         <font>
+            <Font name="System Bold" size="32.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
