@@ -9,7 +9,7 @@ import javafx.scene.control.TextField;
 
 public class LoginController implements Initializable {
     @FXML
-    public Label title, inputTitle, waiting;
+    public Label title, waiting;
 
     @FXML
     public TextField servidor;
@@ -39,7 +39,6 @@ public class LoginController implements Initializable {
 
     public void showWaiting() {
         title.setVisible(false);
-        inputTitle.setVisible(false);
         servidor.setVisible(false);
         jugar.setVisible(false);
         waiting.setVisible(true);

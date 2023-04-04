@@ -1,6 +1,8 @@
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.json.JSONObject;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
@@ -30,15 +32,15 @@ public class CtrlGame implements Initializable {
         });
     }
 
-    public void drawingStart () {
+    public void drawingStart() {
         ctrlCanvas.start(canvas);
     }
 
-    public void drawingStop () {
+    public void drawingStop() {
         ctrlCanvas.stop();
     }
 
-    public void updateCanvasSize () {
+    public void updateCanvasSize() {
 
         final double width = UtilsViews.parentContainer.getWidth();
         final double height = UtilsViews.parentContainer.getHeight();
@@ -48,47 +50,66 @@ public class CtrlGame implements Initializable {
         canvas.setHeight(height);
     }
 
-    public void keyEvent (KeyEvent evt) {
+    public void keyEvent(KeyEvent evt) {
+        try {
 
-        // Quan apretem una tecla
-        if (evt.getEventType() == KeyEvent.KEY_PRESSED) {
-            if (evt.getCode() == KeyCode.UP) {
-                ctrlCanvas.enemyDirection = "up";
+            JSONObject obj = new JSONObject("{}");
+            obj.put("type", "currentDirection");
+
+            // Quan apretem una tecla
+            if (evt.getEventType() == KeyEvent.KEY_PRESSED) {
+                if (evt.getCode() == KeyCode.UP) {
+                    ctrlCanvas.enemyDirection = "up";
+                    obj.put("enemyInputDirection", "up");
+                }
+                if (evt.getCode() == KeyCode.DOWN) {
+                    ctrlCanvas.enemyDirection = "down";
+                    obj.put("enemyInputDirection", "down");
+                }
+
+                if (evt.getCode() == KeyCode.W) {
+                    ctrlCanvas.playerDirection = "up";
+                    obj.put("playerInputDirection", "up");
+                }
+                if (evt.getCode() == KeyCode.S) {
+                    ctrlCanvas.playerDirection = "down";
+                    obj.put("playerInputDirection", "down");
+                }
             }
-            if (evt.getCode() == KeyCode.DOWN) {
-                ctrlCanvas.enemyDirection = "down";
+
+            // Quan deixem anar la tecla
+            if (evt.getEventType() == KeyEvent.KEY_RELEASED) {
+                if (evt.getCode() == KeyCode.UP) {
+                    if (ctrlCanvas.enemyDirection.equals("up")) {
+                        ctrlCanvas.enemyDirection = "none";
+                        obj.put("enemyInputDirection", "none");
+                    }
+                }
+                if (evt.getCode() == KeyCode.DOWN) {
+                    if (ctrlCanvas.enemyDirection.equals("down")) {
+                        ctrlCanvas.enemyDirection = "none";
+                        obj.put("enemyInputDirection", "none");
+                    }
+                }
+                if (evt.getCode() == KeyCode.W) {
+                    if (ctrlCanvas.playerDirection.equals("up")) {
+                        ctrlCanvas.playerDirection = "none";
+                        obj.put("playerInputDirection", "none");
+                    }
+                }
+                if (evt.getCode() == KeyCode.S) {
+                    if (ctrlCanvas.playerDirection.equals("down")) {
+                        ctrlCanvas.playerDirection = "none";
+                        obj.put("playerInputDirection", "none");
+                    }
+                }
             }
-            
-            if (evt.getCode() == KeyCode.W) {
-                ctrlCanvas.playerDirection = "up";
-            }
-            if (evt.getCode() == KeyCode.S) {
-                ctrlCanvas.playerDirection = "down";
-            }
+
+            Main.socketClient.safeSend(obj.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        // Quan deixem anar la tecla
-        if (evt.getEventType() == KeyEvent.KEY_RELEASED) {
-            if (evt.getCode() == KeyCode.UP) {
-                if (ctrlCanvas.enemyDirection.equals("up")) {
-                    ctrlCanvas.enemyDirection = "none";
-                }
-            }
-            if (evt.getCode() == KeyCode.DOWN) {
-                if (ctrlCanvas.enemyDirection.equals("down")) {
-                    ctrlCanvas.enemyDirection = "none";
-                }
-            }
-            if (evt.getCode() == KeyCode.W) {
-                if (ctrlCanvas.playerDirection.equals("up")) {
-                    ctrlCanvas.playerDirection = "none";
-                }
-            }
-            if (evt.getCode() == KeyCode.S) {
-                if (ctrlCanvas.playerDirection.equals("down")) {
-                    ctrlCanvas.playerDirection = "none";
-                }
-            }
-        }
     }
 }

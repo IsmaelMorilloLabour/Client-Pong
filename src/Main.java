@@ -12,6 +12,7 @@ public class Main extends Application {
     public static String protocolWS = "ws";
     public static String host = "localhost";
     public static int port = 3000;
+    public static int playersConnected = 0;
 
     /*
      * public static String protocolWS = "wss";
@@ -34,7 +35,6 @@ public class Main extends Application {
 
         UtilsViews.parentContainer.setStyle("-fx-font: 14 arial;");
         UtilsViews.addView(getClass(), "ViewLogin", "./assets/viewLogin.fxml");
-        UtilsViews.addView(getClass(), "ViewWaiting", "./assets/viewWaiting.fxml");
         UtilsViews.addView(getClass(), "ViewGame", "./assets/viewGame.fxml");
         ctrlGame = (CtrlGame) UtilsViews.getController("ViewGame");
 
@@ -45,6 +45,7 @@ public class Main extends Application {
 
         stage.setScene(scene);
         stage.onCloseRequestProperty();
+        stage.setResizable(false);
         stage.setTitle("M9 Pong");
         stage.setMinWidth(windowWidth);
         stage.setMinHeight(windowHeight);
@@ -52,7 +53,7 @@ public class Main extends Application {
 
         // Add icon only if not Mac
         if (!System.getProperty("os.name").contains("Mac")) {
-            Image icon = new Image("file:./assets/icon.png");
+            Image icon = new Image("file:./assets/ping-pong.png");
             stage.getIcons().add(icon);
         }
     }
@@ -61,9 +62,9 @@ public class Main extends Application {
         socketClient = UtilsWS.getSharedInstance(Main.protocolWS + "://" + Main.host + ":" + Main.port);
         socketClient.onMessage((response) -> {
             JSONObject msgObj = new JSONObject(response);
-            CtrlGame.ctrlCanvas.receiveList(msgObj);
+            CtrlGame.ctrlCanvas.receive(msgObj);
 
-            if (SharedResources.playersConnected == 2) {
+            if (playersConnected == 2) {
                 Platform.runLater(() -> {
                     UtilsViews.setView("ViewGame");
                     CtrlGame ctrlGame = (CtrlGame) UtilsViews.getController("ViewGame");
@@ -75,6 +76,7 @@ public class Main extends Application {
 
     @Override
     public void stop() {
+        System.exit(1);
         ctrlGame.drawingStop();
         socketClient.close();
         System.exit(1); // Kill all executor services

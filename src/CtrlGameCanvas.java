@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javafx.animation.AnimationTimer;
@@ -22,30 +23,25 @@ public class CtrlGameCanvas {
     private boolean gameOver;
 
     private int playerPoints = 0;
-    private double playerX = 0;
+    private double playerX;
     private double playerY = 200;
 
     private int enemyPoints = 0;
-    private double enemyX = 0;
+    private double enemyX;
     private double enemyY = 200;
 
-    int actualXPlayer = 0;
-    int actualYPlayer = 0;
-    int actualXEnemy = 0;
-    int actualYEnemy = 0;
-
-    private final double playerWidth = 5;
+    private final double playerWidth = 10;
     private double playerSpeed = 200;
     private final double playerSpeedIncrement = 5;
     public String playerDirection = "none";
     public String enemyDirection = "none";
 
-    private double ballX = Double.POSITIVE_INFINITY;
-    private double ballY = Double.POSITIVE_INFINITY;
-    private final double ballSize = 15;
+    private double ballX = 200;
+    private double ballY = 200;
+    private final double ballSize = 25;
     private final double ballHalf = ballSize / 2;
     private double ballSpeed = 150;
-    private final double ballSpeedIncrement = 25;
+    private final double ballSpeedIncrement = 0;
     private String ballDirection = "upLeft";
 
     // Iniciar el context i bucle de dibuix
@@ -57,11 +53,11 @@ public class CtrlGameCanvas {
         gc = canvas.getGraphicsContext2D();
 
         // Set initial positions
-        ballX = cnv.getWidth() / 2;
-        ballY = cnv.getHeight() / 2;
+        ballX = 200;
+        ballY = 300;
 
-        playerX = 50;
-        enemyX = 750;
+        playerX = 30;
+        enemyX = 770;
 
         // Init drawing bucle
         animationTimer = new UtilsFps(this::run, this::draw);
@@ -73,21 +69,63 @@ public class CtrlGameCanvas {
         animationTimer.stop();
     }
 
-    private void sendMessage() {
+    public void sendCurrentState(double p1X, double p1Y, double p2X, double p2Y) {
         JSONObject obj = new JSONObject("{}");
-        obj.put("type", "broadcast");
-        obj.put("actualXEnemy", actualXEnemy);
-        obj.put("actualYEnemy", actualYEnemy);
-        obj.put("actualXPlayer", actualXPlayer);
-        obj.put("actualYPlayer", actualYPlayer);
+        obj.put("type", "currentStatePlayers");
+        obj.put("p1X", p1X);
+        obj.put("p1Y", p1Y);
+
+        obj.put("p2X", p2X);
+        obj.put("p2Y", p2Y);
 
         Main.socketClient.safeSend(obj.toString());
-        System.out.println("Send WebSocket: " + obj.toString());
     }
 
-    public void receiveList(JSONObject messageObj) {
-        JSONArray list = messageObj.getJSONArray("list");
-        SharedResources.playersConnected = list.length();
+    public void sendCurrentStateBall(double bX, double bY) {
+        JSONObject obj = new JSONObject("{}");
+        obj.put("type", "currentStateBall");
+
+        obj.put("bY", bY);
+        obj.put("bX", bX);
+
+        Main.socketClient.safeSend(obj.toString());
+    }
+
+    public void receive(JSONObject messageObj) {
+        try {
+            String type = messageObj.getString("type");
+
+            if (type.equals("listPlayers")) {
+                JSONArray list = messageObj.getJSONArray("list");
+                Main.playersConnected = list.length();
+
+            } else if (type.equals("currentStatePlayers")) {
+
+                JSONObject obj = messageObj.getJSONObject("gameState");
+                JSONObject objPlayer = obj.getJSONObject("player");
+                JSONObject objPlayer2 = obj.getJSONObject("player2");
+
+                playerX = objPlayer.getDouble("x");
+                playerY = objPlayer.getDouble("y");
+
+                enemyX = objPlayer2.getDouble("x");
+                enemyY = objPlayer2.getDouble("y");
+
+            } else if (type.equals("currentStateBall")) {
+
+                JSONObject obj = messageObj.getJSONObject("gameState");
+                JSONObject objBall = obj.getJSONObject("ball");
+
+                ballX = objBall.getDouble("x");
+                ballY = objBall.getDouble("y");
+
+            } else if (type.equals("gameOver")) {
+                Main.socketClient.close();
+            }
+
+        } catch (JSONException e) {
+            System.err.println("Error processing JSON message: " + e.getMessage());
+        }
     }
 
     // Animar
@@ -103,10 +141,12 @@ public class CtrlGameCanvas {
         switch (playerDirection) {
             case "up":
                 playerY -= playerSpeed / fps;
+                sendCurrentState(playerX, playerY, enemyX, enemyY);
                 break;
 
             case "down":
                 playerY += playerSpeed / fps;
+                sendCurrentState(playerX, playerY, enemyX, enemyY);
                 break;
         }
 
@@ -114,10 +154,12 @@ public class CtrlGameCanvas {
         switch (enemyDirection) {
             case "up":
                 enemyY -= playerSpeed / fps;
+                sendCurrentState(playerX, playerY, enemyX, enemyY);
                 break;
 
             case "down":
                 enemyY += playerSpeed / fps;
+                sendCurrentState(playerX, playerY, enemyX, enemyY);
                 break;
         }
 
@@ -148,20 +190,28 @@ public class CtrlGameCanvas {
             case "upRight":
                 ballNextX = ballX + ballSpeed / fps;
                 ballNextY = ballY - ballSpeed / fps;
+
                 break;
+
             case "upLeft":
                 ballNextX = ballX - ballSpeed / fps;
                 ballNextY = ballY - ballSpeed / fps;
+
                 break;
+
             case "downRight":
                 ballNextX = ballX + ballSpeed / fps;
                 ballNextY = ballY + ballSpeed / fps;
+
                 break;
+
             case "downLeft":
                 ballNextX = ballX - ballSpeed / fps;
                 ballNextY = ballY + ballSpeed / fps;
                 break;
         }
+
+        sendCurrentStateBall(ballNextX, ballNextY);
 
         // Check ball collision with board sides
         final double[][] lineBall = { { ballX, ballY }, { ballNextX, ballNextY } };
@@ -235,10 +285,10 @@ public class CtrlGameCanvas {
         if (intersectionPlayer != null) {
             switch (ballDirection) {
                 case "upLeft":
-                    ballDirection = "downRight";
+                    ballDirection = "upRight";
                     break;
                 case "downLeft":
-                    ballDirection = "upRight";
+                    ballDirection = "downRight";
                     break;
             }
             ballX = intersectionPlayer[0];
@@ -253,10 +303,10 @@ public class CtrlGameCanvas {
         if (intersectionEnemy != null) {
             switch (ballDirection) {
                 case "upRight":
-                    ballDirection = "downLeft";
+                    ballDirection = "upLeft";
                     break;
                 case "downRight":
-                    ballDirection = "upLeft";
+                    ballDirection = "downLeft";
                     break;
             }
             ballX = intersectionEnemy[0];
@@ -264,35 +314,32 @@ public class CtrlGameCanvas {
             ballSpeed += ballSpeedIncrement;
             playerSpeed += playerSpeedIncrement;
         }
-
     }
 
     // Dibuixar
     private void draw() {
 
         // Clean drawing area
+        gc.setFill(Color.WHITE);
         gc.clearRect(0, 0, cnv.getWidth(), cnv.getHeight());
 
         // Draw board
-        gc.setStroke(Color.BLACK);
+        gc.setStroke(Color.WHITE);
         gc.setLineWidth(borderSize);
-        gc.strokeRect(0, 0, borderSize, cnv.getHeight());
         gc.strokeRect(0, 0, cnv.getWidth(), borderSize);
-        gc.strokeRect(cnv.getWidth() - borderSize, 0, borderSize, cnv.getHeight());
+        gc.strokeRect(0, cnv.getHeight() - borderSize, cnv.getWidth(), borderSize);
 
         drawPlayer(playerX, playerY, Color.GREEN);
         drawPlayer(enemyX, enemyY, Color.PURPLE);
 
         // Draw ball
-        gc.setFill(Color.BLACK);
         gc.fillArc(ballX - ballHalf, ballY - ballHalf, ballSize, ballSize, 0.0, 360, ArcType.ROUND);
 
         // Draw text with points
-        gc.setFill(Color.BLACK);
-        gc.setFont(new Font("Arial", 20));
+        gc.setFont(new Font("Arial", 40));
         drawText(gc, String.valueOf(playerPoints), (cnv.getWidth() / 2) + 40, 20, "right");
         drawText(gc, "-", cnv.getWidth() / 2, 20, "right");
-        drawText(gc, String.valueOf(enemyPoints), 350, 20, "left");
+        drawText(gc, String.valueOf(enemyPoints), 340, 20, "left");
 
         // Draw game over text
         if (gameOver) {

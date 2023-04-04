@@ -7,28 +7,26 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" styleClass="background" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
    <children>
-      <Label fx:id="title" layoutX="257.0" layoutY="72.0" text="Inicio">
+      <Label fx:id="title" layoutX="259.0" layoutY="114.0" prefHeight="72.0" prefWidth="283.0" styleClass="title" text="Pong Game" textAlignment="CENTER" textFill="WHITE">
          <font>
-            <Font name="System Bold" size="33.0" />
+            <Font name="System Bold" size="48.0" />
          </font>
       </Label>
-      <VBox layoutX="178.0" layoutY="186.0">
-         <children>
-            <Label fx:id="inputTitle" text="Servidor:">
-               <font>
-                  <Font name="System Bold" size="16.0" />
-               </font>
-            </Label>
-            <TextField fx:id="servidor" prefHeight="25.0" prefWidth="245.0" promptText="Introduce una dirección" />
-         </children>
-      </VBox>
-      <Button fx:id="jugar" layoutX="261.0" layoutY="292.0" mnemonicParsing="false" onAction="#connect" prefHeight="37.0" prefWidth="78.0" text="Jugar" />
-      <Label fx:id="waiting" layoutX="93.0" layoutY="163.0" text="Waiting for second player..." visible="false">
+      <VBox layoutX="178.0" layoutY="186.0" />
+      <Button fx:id="jugar" layoutX="278.0" layoutY="407.0" mnemonicParsing="false" onAction="#connect" prefHeight="94.0" prefWidth="245.0" styleClass="title" text="Jugar">
          <font>
-            <Font name="System Bold" size="32.0" />
+            <Font size="20.0" />
+         </font></Button>
+      <Label fx:id="waiting" layoutX="79.0" layoutY="268.0" styleClass="title" stylesheets="@main.css" text="Waiting for second player..." visible="false">
+         <font>
+            <Font name="System Bold" size="25.0" />
          </font>
       </Label>
+      <TextField fx:id="servidor" layoutX="210.0" layoutY="276.0" prefHeight="49.0" prefWidth="381.0" promptText="Introduce una dirección" styleClass="text">
+         <font>
+            <Font size="20.0" />
+         </font></TextField>
    </children>
 </AnchorPane>

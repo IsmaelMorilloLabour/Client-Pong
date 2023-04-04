@@ -1,0 +1,39 @@
+/* Define font family */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+@font-face {
+    font-family: 'VT323';
+    src: url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+}
+.root {
+    -fx-font-family: 'Minecraft', sans-serif;
+}
+
+/* Apply font family and color to text */
+.text, .title {
+    -fx-font-family: 'Minecraft', sans-serif;
+    -fx-text-fill: #e2e4f1;
+}
+
+/* Style title */
+.title {
+    -fx-font-size: 50px;
+}
+
+/* Style background */
+.background {
+    -fx-background-color: #0c1224;
+}
+
+/* Style button */
+.button {
+    -fx-background-color: #23262e;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-style: italic;
+    -fx-font-size: 28px;
+    -fx-background-radius: 10 10 10 10;
+    -fx-border-radius: 10 10 10 10;
+    -fx-padding: 10px 20px;
+}
